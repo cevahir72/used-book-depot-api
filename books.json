@@ -1,0 +1,10 @@
+[
+  { "bookName": "Sefiller", "stock": 5 },
+  { "bookName": "Suç ve Ceza", "stock": 3 },
+  { "bookName": "Kürk Mantolu Madonna", "stock": 7 },
+  { "bookName": "1984", "stock": 10 },
+  { "bookName": "Hayvan Çiftliği", "stock": 4 },
+  { "bookName": "Küçük Prens", "stock": 8 },
+  { "bookName": "Beyaz Diş", "stock": 2 },
+  { "bookName": "Martin Eden", "stock": 6 }
+]
