@@ -64,14 +64,29 @@ app.post('/book', async (req, res) => {
 });
 
 // DB sync ve server başlat
-db.sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Veritabanı senkronize edildi');
+const isProduction = process.env.NODE_ENV === 'production';
+
+const startServer = async () => {
+  try {
+    if (isProduction) {
+      // Production: Sadece bağlantıyı test et, schema değiştirme
+      await db.sequelize.authenticate();
+      console.log('Veritabanı bağlantısı doğrulandı (production)');
+    } else {
+      // Development: Schema senkronizasyonu yap
+      await db.sequelize.sync({ alter: true });
+      console.log('Veritabanı senkronize edildi (development)');
+    }
+
     app.listen(PORT, () => {
       console.log(`API çalışıyor: http://localhost:${PORT}`);
       console.log(`POST /book - body: { "bookName": "Kitap Adı" }`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('DB bağlantı hatası:', err);
-  });
+    process.exit(1);
+  }
+};
+
+startServer();
