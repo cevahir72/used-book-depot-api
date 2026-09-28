@@ -2,11 +2,12 @@
   "name": "used-book-depot-api",
   "version": "1.0.0",
   "description": "Single route Express API for book lookup",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "vercel-build": "echo 'No build step required'"
   },
   "dependencies": {
     "dotenv": "^18.0.4",
