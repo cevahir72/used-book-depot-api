@@ -3,6 +3,9 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
+// pg dialect'ini explicit require et - Vercel'de "install pg manually" hatasını önler
+const pg = require('pg');
+
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION;
 
 // Neon için connection string kullan (sslmode=require zorunlu)
@@ -10,6 +13,7 @@ let sequelize;
 
 const sequelizeOptions = {
   dialect: 'postgres',
+  dialectModule: pg, // Explicit pg module - prevents "Please install pg package manually"
   logging: false,
   dialectOptions: {
     ssl: {
