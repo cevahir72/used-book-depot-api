@@ -1,24 +1,36 @@
 'use strict';
 
+require('dotenv').config();
 const { Sequelize } = require('sequelize');
-const config = require('../config/database.json');
 
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
-
+// Neon için connection string kullan (sslmode=require zorunlu)
 let sequelize;
 
-if (dbConfig.use_env_variable) {
-  sequelize = new Sequelize(process.env[dbConfig.use_env_variable], {
-    dialect: dbConfig.dialect,
-    logging: false
+if (process.env.DATABASE_URL) {
+  // Connection string varsa kullan (Neon pooled/direct URL)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
   });
 } else {
-  sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
-    host: dbConfig.host,
-    port: dbConfig.port,
-    dialect: dbConfig.dialect,
-    logging: false
+  // Ayrı parametrelerden connection string oluştur
+  const connectionString = `postgresql://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?sslmode=require`;
+  
+  sequelize = new Sequelize(connectionString, {
+    dialect: 'postgres',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
   });
 }
 

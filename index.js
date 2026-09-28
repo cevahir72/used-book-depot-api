@@ -2,11 +2,31 @@ const express = require('express');
 const db = require('./models');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// POST /book - kitap ara
+// GET /books - tüm kitapları getir
+app.get('/books', async (req, res) => {
+  try {
+    const books = await db.Book.findAll({
+      order: [['name', 'ASC']]
+    });
+
+    res.json({
+      count: books.length,
+      books: books.map(b => ({
+        bookName: b.name,
+        stock: b.stock
+      }))
+    });
+  } catch (err) {
+    console.error('DB hatası:', err);
+    res.status(500).json({ error: 'Sunucu hatası' });
+  }
+});
+
+// POST /book - kitap ara (LIKE pattern: %{değişken}%)
 app.post('/book', async (req, res) => {
   const { bookName } = req.body;
 
@@ -15,22 +35,27 @@ app.post('/book', async (req, res) => {
   }
 
   try {
-    // Kitabı ara (case-insensitive)
-    const book = await db.Book.findOne({
-      where: db.sequelize.where(
-        db.sequelize.fn('LOWER', db.sequelize.col('name')),
-        bookName.toLowerCase()
-      )
+    // Kitabı LIKE pattern ile ara (case-insensitive, iLike kullan)
+    const books = await db.Book.findAll({
+      where: {
+        name: {
+          [db.Sequelize.Op.iLike]: `%${bookName}%`
+        }
+      },
+      order: [['name', 'ASC']]
     });
 
-    if (!book) {
+    if (!books || books.length === 0) {
       return res.status(404).json({ error: 'Kitap bulunamadı' });
     }
 
-    // Bulundu - isim ve stok döndür
+    // Bulundu - isim ve stok döndür (birden fazla olabilir)
     res.json({
-      bookName: book.name,
-      stock: book.stock
+      count: books.length,
+      books: books.map(b => ({
+        bookName: b.name,
+        stock: b.stock
+      }))
     });
   } catch (err) {
     console.error('DB hatası:', err);
